@@ -1,6 +1,8 @@
 class Formacion {
 	var vagones = #{}
 	const property locomotoras = #{}
+	var property ciudadOrigen
+	var property ciudadDestino
 	method agregarLocomotora(locomotora){ locomotoras.add(locomotora) }
 	method agregarVagon(vagon){ vagones.add(vagon) }
 	method cantidadDePasajerosQuePuedeTransportar() = vagones.sum { vagon => vagon.cantidadMaximaDePasajeros() }
@@ -16,10 +18,37 @@ class Formacion {
 	method pesoTotal() = self._pesoLocomotoras() + self._pesoMaximoTotalVagones()
 	method unidades() = vagones.size() + locomotoras.size()
 	method _pesoLocomotoras() = locomotoras.sum { locomotora => locomotora.peso() }
+	method cantidadDeBanios() = vagones.sum { vagon => vagon.cantidadDeBanios() }
 }
+
+class FormacionCortaDistancia inherits Formacion {
+	const property limiteDeVelocidad = 60
+	method estaBienArmada() = self.puedeMoverse() and not self.esCompleja()
+	override method velocidadMaxima() = limiteDeVelocidad.min(super())
+}
+
+class FormacionLargaDistancia inherits Formacion {
+	method estaBienArmada() = self.puedeMoverse() and self.tieneSuficientesBanios()
+	method tieneSuficientesBanios() = self.cantidadDeBanios() >= (self.cantidadDePasajerosQuePuedeTransportar()/50)
+	method limiteDeVelocidad() = if(ciudadOrigen.tamanio() == "Grande" and ciudadDestino.tamanio() == "Grande") 200 else 150
+	override method velocidadMaxima() = self.limiteDeVelocidad().min(super())
+}
+
+class FormacionAltaVelocidad inherits FormacionLargaDistancia{
+	override method limiteDeVelocidad() = 400
+	override method estaBienArmada() = self.puedeMoverse() and self.esVeloz() and self.esLiviana()
+	method esVeloz() = self.velocidadMaxima() >= 250
+	method esLiviana() = vagones.size() == self.cantidadDeVagonesLivianos()
+}
+
+class Ciudad{
+	var property tamanio = "Grande"
+}
+
 class VagonDePasajeros {
 	var property largo = 0
 	var property anchoUtil = 0
+	var property cantidadDeBanios = 0
 	method cantidadMaximaDePasajeros() = if(anchoUtil < 2.5) largo * 8 else largo * 10
 	method pesoMaximo() = self.cantidadMaximaDePasajeros() * 80
 }
@@ -28,6 +57,7 @@ class VagonDeCarga {
 	var property cargaMaxima = 0
 	method pesoMaximo() = cargaMaxima + 160
 	method cantidadMaximaDePasajeros() = 0
+	method cantidadDeBanios() = 0
 }
 
 class Locomotora {
