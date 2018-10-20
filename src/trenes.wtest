@@ -1,4 +1,5 @@
 import trenes.*
+import unidades.*
 describe "tests de trenes"{
 	const formacion = new Formacion()
 	const vagonPasajeros1 = new VagonDePasajeros()

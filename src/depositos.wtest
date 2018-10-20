@@ -1,4 +1,6 @@
 import trenes.*
+import depositos.*
+import unidades.*
 describe "tests de Deposito" {
 	const deposito = new Deposito()
 	const formacion1 = new Formacion()
