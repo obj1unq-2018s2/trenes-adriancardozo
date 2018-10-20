@@ -1,0 +1,55 @@
+import trenes.*
+describe "tests de trenes"{
+	const formacion = new Formacion()
+	const vagonPasajeros1 = new VagonDePasajeros()
+	const vagonPasajeros2 = new VagonDePasajeros()
+	const vagonCarga1 = new VagonDeCarga()
+	const vagonCarga2 = new VagonDeCarga()
+	const locomotora1 = new Locomotora()
+	const locomotora2 = new Locomotora()
+	fixture{
+		vagonPasajeros1.anchoUtil(2.5)
+		vagonPasajeros1.largo(250)
+		vagonPasajeros2.anchoUtil(2.4)
+		vagonPasajeros2.largo(250)
+		vagonCarga1.cargaMaxima(2700)
+		vagonCarga2.cargaMaxima(500)
+		locomotora1.velocidadMaxima(200)
+		locomotora1.peso(100)
+		locomotora1.pesoMaximoQuePuedeArrastrar(700)
+		locomotora2.velocidadMaxima(500)
+		locomotora2.peso(300)
+		locomotora2.pesoMaximoQuePuedeArrastrar(700)
+		formacion.agregarVagon(vagonPasajeros1)
+		formacion.agregarVagon(vagonPasajeros2)
+		formacion.agregarVagon(vagonCarga1)
+		formacion.agregarVagon(vagonCarga2)
+		formacion.agregarLocomotora(locomotora1)
+		formacion.agregarLocomotora(locomotora2)
+		
+	}
+	test "test de cantidadDePasajerosQuePuedeTransportar"{
+		assert.equals(4500, formacion.cantidadDePasajerosQuePuedeTransportar())
+	}
+	test "test de cantidadDeVagonesLivianos"{
+		assert.equals(1, formacion.cantidadDeVagonesLivianos())
+	}
+	test "test de velocidadMaxima" {
+		assert.equals(200, formacion.velocidadMaxima())
+	}
+	test "test de esEficiente" {
+		assert.notThat(formacion.esEficiente())
+		locomotora2.pesoMaximoQuePuedeArrastrar(1500)
+		assert.that(formacion.esEficiente())
+	}
+	test "test de puedeMoverse" {
+		assert.notThat(formacion.puedeMoverse())
+		locomotora2.pesoMaximoQuePuedeArrastrar(500000)
+		assert.that(formacion.puedeMoverse())
+	}
+	test "test de kilosDeEmpujeFaltantesParaMoverse"{
+		assert.equals(362520, formacion.kilosDeEmpujeFaltantesParaMoverse())
+		locomotora2.pesoMaximoQuePuedeArrastrar(363220)
+		assert.equals(0, formacion.kilosDeEmpujeFaltantesParaMoverse())
+	}
+}

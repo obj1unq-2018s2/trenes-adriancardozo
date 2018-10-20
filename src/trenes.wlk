@@ -1,9 +1,11 @@
 class Formacion {
 	var vagones = #{}
-	var locomotoras = #{}
-	method agregarLocomotora(){}
+	const property locomotoras = #{}
+	method agregarLocomotora(locomotora){ locomotoras.add(locomotora) }
+	method agregarVagon(vagon){ vagones.add(vagon) }
 	method cantidadDePasajerosQuePuedeTransportar() = vagones.sum { vagon => vagon.cantidadMaximaDePasajeros() }
 	method cantidadDeVagonesLivianos() = vagones.count { vagon => vagon.pesoMaximo() < 2500 }
+	method velocidadMaxima() = locomotoras.min { locomotora => locomotora.velocidadMaxima() }.velocidadMaxima()
 	method esEficiente() = locomotoras.all { locomotora => locomotora.peso() * 5 <= locomotora.pesoMaximoQuePuedeArrastrar() }
 	method puedeMoverse() = self._arrastreUtilTotal() >= self._pesoMaximoTotalVagones()
 	method kilosDeEmpujeFaltantesParaMoverse() = if(self.puedeMoverse()) 0 else self._pesoMaximoTotalVagones() - self._arrastreUtilTotal()
@@ -22,7 +24,7 @@ class VagonDePasajeros {
 	method pesoMaximo() = self.cantidadMaximaDePasajeros() * 80
 }
 
-class VagonDecarga {
+class VagonDeCarga {
 	var property cargaMaxima = 0
 	method pesoMaximo() = cargaMaxima + 160
 	method cantidadMaximaDePasajeros() = 0
@@ -33,12 +35,21 @@ class Locomotora {
 	var property pesoMaximoQuePuedeArrastrar = 0
 	var property velocidadMaxima = 0
 	method arrastreUtil()= pesoMaximoQuePuedeArrastrar - peso
+	method puedeMoverA(formacion) = self.arrastreUtil() >= formacion.kilosDeEmpujeFaltantesParaMoverse()
 }
 
 class Deposito {
 	var formaciones = #{}
 	var locomotorasSueltas = #{}
+	method agregarFormacion(formacion){ formaciones.add(formacion) }
+	method agregarLocomotoraSuelta(locomotora){ locomotorasSueltas.add(locomotora) }
 	method vagonesMasPesados() = formaciones.map { formacion => formacion.vagonMasPesado() }.asSet()
 	method necesitaConductorExperimentado() = formaciones.any { formacion => formacion.esCompleja() }
-	method agregarLocomotoraA(formacion)
+	method agregarLocomotoraA(formacion){
+		if(not formacion.puedeMoverse() and self._hayLocomotoraPara(formacion)){
+			formacion.agregarLocomotora(self._locomotoraPara(formacion))
+		}
+	}
+	method _locomotoraPara(formacion) = locomotorasSueltas.find { locomotora => locomotora.puedeMoverA(formacion) }
+	method _hayLocomotoraPara(formacion) = locomotorasSueltas.any { locomotora => locomotora.puedeMoverA(formacion) }
 }
